@@ -1,0 +1,35 @@
+#!/bin/bash
+
+function assistance () { # show this help
+        echo "Back of the envelope calculation helpers"
+	    echo "Available tools:"
+	        grep "function.*#" "$0" \
+		    | egrep -v 'grep|sed' \
+		    | sed -e 's|function \(.*\)[ \t]*(.*#\(.*\)$|\1 - \2|'
+}
+
+function sum () { # add all rows together and print the final sum
+    awk '{x+=$1;}END{print x;}' "$@"
+}
+
+function avg () { # add all rows together and pring the average
+    awk '{x+=$1;}END{print x/NR;}' "$@"
+}
+
+function diff () { # print second minus first, third minus second...
+    awk 'NR==1{beg=$1} NR>1{print $1-beg; beg=$1;}'
+}
+
+function cumsum () { # cumulative sum
+    awk 'BEGIN{prev=0;}{prev += $1; print prev;}'
+}
+
+function calc () { # calculator; fed directly into bc -l
+    echo "$@" | bc -l
+}
+
+test 0 == $# && assistance && exit
+echo "${1}" | grep -q '\-h' && assistance && exit
+tool="${1}"
+shift
+eval "$tool" "$@"
